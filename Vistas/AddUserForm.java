@@ -6,10 +6,13 @@
 package Vistas;
 
 import Modelo.Conexion;
+import Modelo.TipoDocumento;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
 /**
@@ -18,6 +21,7 @@ import javax.swing.JOptionPane;
  */
 public class AddUserForm extends javax.swing.JDialog {
     
+    ComboBoxModel modeloEnumTipoDocumento;
     Conexion conexion = new Conexion();
     Connection connection;
     Statement st;
@@ -25,8 +29,10 @@ public class AddUserForm extends javax.swing.JDialog {
 
     public AddUserForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        modeloEnumTipoDocumento = new DefaultComboBoxModel(TipoDocumento.values());
         initComponents();
         this.setLocationRelativeTo(parent);
+        
     }
 
     /**
@@ -81,7 +87,7 @@ public class AddUserForm extends javax.swing.JDialog {
         jLabel7.setFont(new java.awt.Font("Calibri", 1, 14)); // NOI18N
         jLabel7.setText("CORREO:");
 
-        cbDocumentType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cedúla de ciudadanía", "Cedúla de extranjería", "Pasaporte", "Libreta militar" }));
+        cbDocumentType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cedula", "Pasaporte", "TarjetaIdentidad", "otro" }));
         cbDocumentType.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/newUser.png"))); // NOI18N
@@ -230,7 +236,7 @@ public class AddUserForm extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Faltan campos por diligenciar","Nuevo empleado",JOptionPane.WARNING_MESSAGE);
         }else{
             String queryCrearEmpleado = "INSERT INTO `empleados`( `nombreEmp`, `apellidos`, `tipoDocumento`, `documento`, `correo`) VALUES ('"+ nombre +"','"+ apellidos +"','"+ tipoDocumento +"','"+ documento +"','"+ email +"')";
-            
+            System.out.println(queryCrearEmpleado);
             
             try{
                 connection = conexion.getConnection();

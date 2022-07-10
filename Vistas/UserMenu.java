@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -32,20 +33,23 @@ public class UserMenu extends javax.swing.JFrame {
     }
 
    private void listarEmpleados(){
+       String filtroBusqueda = txtSearch.getText();
+       if(filtroBusqueda.isEmpty()){
        String queryConsulta = "SELECT * FROM empleados";
        try{
            connection = conexion.getConnection();
            st = connection.createStatement();
            rs = st.executeQuery(queryConsulta);
            
-           Object[] empleados = new Object[5];
+           Object[] empleados = new Object[6];
            contenidoTablaEmpleados = (DefaultTableModel)tblEmpleados.getModel();
            while(rs.next()){
                empleados[0] = rs.getInt("idEmp");
-               empleados[1] = rs.getString("nombreEmp")+ " "+ rs.getString("apellidos");
-               empleados[2] = rs.getString("tipoDocumento");
-               empleados[3] = rs.getString("documento");
-               empleados[4] = rs.getString("correo");
+               empleados[1] = rs.getString("nombreEmp");
+               empleados[2] = rs.getString("apellidos");
+               empleados[3] = rs.getString("tipoDocumento");
+               empleados[4] = rs.getString("documento");
+               empleados[5] = rs.getString("correo");
                
                contenidoTablaEmpleados.addRow(empleados);
                System.out.println("id: "+ empleados[0]+ "Nombre: "+ empleados[1] + "tipo doc: "+ empleados[2]+ "Documento: "+ empleados[3]+ "email" + empleados[4] );
@@ -53,9 +57,39 @@ public class UserMenu extends javax.swing.JFrame {
                
            }
        } catch(SQLException e){
-           System.out.println("Error");
+           System.out.println("Error");    
+       }
+       
+           
+       }else{
+           String queryConsulta = "SELECT * FROM empleados WHERE nombreEmp LIKE '%"+filtroBusqueda+"%' or apellidos LIKE '%"+filtroBusqueda+"%'";
+           System.out.println(queryConsulta);
+           try{
+           connection = conexion.getConnection();
+           st = connection.createStatement();
+           rs = st.executeQuery(queryConsulta);
+           
+           Object[] empleados = new Object[6];
+           contenidoTablaEmpleados = (DefaultTableModel)tblEmpleados.getModel();
+           while(rs.next()){
+               empleados[0] = rs.getInt("idEmp");
+               empleados[1] = rs.getString("nombreEmp");
+               empleados[2] = rs.getString("apellidos");
+               empleados[3] = rs.getString("tipoDocumento");
+               empleados[4] = rs.getString("documento");
+               empleados[5] = rs.getString("correo");
+               
+               contenidoTablaEmpleados.addRow(empleados);
+               System.out.println("id: "+ empleados[0]+ "Nombre: "+ empleados[1] + "tipo doc: "+ empleados[2]+ "Documento: "+ empleados[3]+ "email" + empleados[4] );
+               tblEmpleados.setModel(contenidoTablaEmpleados);
+               
+           }
+       } catch(SQLException e){
+           System.out.println("Error");{
            
        }
+       }
+   }
    }
    private void borrarDatosTabla(){
        for (int i = 0; i < tblEmpleados.getRowCount(); i++) {
@@ -64,7 +98,13 @@ public class UserMenu extends javax.swing.JFrame {
            
        }
    }
-    @SuppressWarnings("unchecked")
+    
+   
+       
+  
+   
+   
+   @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -75,11 +115,11 @@ public class UserMenu extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblEmpleados = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
         btnAddUser = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        txtSearch = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
 
@@ -132,11 +172,11 @@ public class UserMenu extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Nombre", "Tipo de documento", "Documento", "Correo"
+                "ID", "Nombre", "Apellido", "Tipo de documento", "Documento", "Correo"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -144,10 +184,12 @@ public class UserMenu extends javax.swing.JFrame {
             }
         });
         tblEmpleados.setGridColor(new java.awt.Color(255, 255, 255));
+        tblEmpleados.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblEmpleadosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblEmpleados);
-
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/showUser.png"))); // NOI18N
-        jButton1.setText("Consultar");
 
         btnAddUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/avatar.png"))); // NOI18N
         btnAddUser.setText("Crear Empleado");
@@ -157,22 +199,29 @@ public class UserMenu extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/deleteUser.png"))); // NOI18N
-        jButton3.setText("Eliminar");
-
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/editUser.png"))); // NOI18N
-        jButton4.setText("Editar");
-
         jLabel2.setFont(new java.awt.Font("Calibri", 1, 36)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("INFORMACIÓN EMPLEADOS");
+
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/showUser.png"))); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        txtSearch.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+
+        jLabel3.setFont(new java.awt.Font("Times New Roman", 1, 18)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("NOMBRE");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addGap(0, 266, Short.MAX_VALUE)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(102, 102, 102)
                 .addComponent(btnAddUser)
@@ -180,16 +229,16 @@ public class UserMenu extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(202, 202, 202)
-                        .addComponent(jButton1)
-                        .addGap(110, 110, 110)
-                        .addComponent(jButton4)
-                        .addGap(121, 121, 121)
-                        .addComponent(jButton3))
+                        .addGap(65, 65, 65)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 812, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(70, 70, 70)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 858, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(240, 240, 240)
+                        .addComponent(jLabel3)
+                        .addGap(27, 27, 27)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(35, 35, 35)
+                        .addComponent(jButton1)))
+                .addContainerGap(164, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -198,14 +247,15 @@ public class UserMenu extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnAddUser)
                     .addComponent(jLabel2))
-                .addGap(43, 43, 43)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 195, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton4)
-                    .addComponent(jButton3))
-                .addGap(66, 66, 66))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel3)))
+                .addGap(35, 35, 35)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 213, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(73, 73, 73))
         );
 
         jTabbedPane1.addTab("Empleados", jPanel3);
@@ -268,6 +318,38 @@ public class UserMenu extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnAddUserActionPerformed
 
+    private void tblEmpleadosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblEmpleadosMouseClicked
+        int row = tblEmpleados.getSelectedRow();
+        System.out.println("FIla seleccionada N°: " + row);
+        //Validation: User dont select any employ
+        if(row < 0){
+            JOptionPane.showMessageDialog(this, "No ha seleccionado ningún empleado","",JOptionPane.WARNING_MESSAGE);
+            
+        }else{
+            //debemos recorrer 6 atributos por cada fila
+            int idEmp = Integer.parseInt(tblEmpleados.getValueAt(row, 0).toString());
+            String nombreEmp = tblEmpleados.getValueAt(row, 1).toString();
+            String apellidos = tblEmpleados.getValueAt(row, 2).toString();
+            String tipoDocumento = tblEmpleados.getValueAt(row, 3).toString();
+            String documento = tblEmpleados.getValueAt(row, 4).toString();
+            String correo = tblEmpleados.getValueAt(row, 5).toString();
+            
+            System.out.println("idempl: "+ idEmp + ", nombreEmp:"+ nombreEmp + ", apellido" + apellidos + 
+                    ", TipoDocumento:" + tipoDocumento + ", documento"+ documento + ", correo: "+correo);
+            ShowUserForm showUserForm = new ShowUserForm(this, true);
+            showUserForm.recibeDatos(idEmp, nombreEmp, apellidos, tipoDocumento, documento, correo);
+            showUserForm.setVisible(true);
+            //para que la tabla actualice se debe borrar todos los datos y volverlos a cargar
+            borrarDatosTabla();
+            listarEmpleados();
+        }
+    }//GEN-LAST:event_tblEmpleadosMouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        borrarDatosTabla();
+        listarEmpleados();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -306,10 +388,9 @@ public class UserMenu extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddUser;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -318,5 +399,6 @@ public class UserMenu extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable tblEmpleados;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 }
